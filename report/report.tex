@@ -1,0 +1,121 @@
+\documentclass[11pt,letterpaper,twocolumn]{article}
+
+
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{verbatim}
+\usepackage{charter}
+\usepackage{amsmath}
+\usepackage{appendix}
+\usepackage{ragged2e}
+\usepackage{array}
+\usepackage{etoolbox}
+\usepackage{fancyhdr}
+\usepackage{booktabs}
+\usepackage{arydshln}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{geometry}
+\geometry{
+  top=0.8in,            
+  inner=0.5in,
+  outer=0.5in,
+  bottom=0.9in,
+  headheight=4ex,       
+  headsep=6.5ex,         
+}
+\usepackage{graphicx}
+\usepackage{mathtools}
+\usepackage{multirow}
+\usepackage{pdfpages}
+\usepackage{subfiles}
+\usepackage[compact]{titlesec}
+\usepackage{stfloats}
+\usepackage{hyperref}
+
+\setlength{\columnsep}{30pt}
+
+
+\pagestyle{fancy}
+\fancyhf{}
+      
+\fancyfoot{}
+\fancyfoot[C]{\thepage} % page
+\renewcommand{\headrulewidth}{0mm} % headrule width
+\renewcommand{\footrulewidth}{0mm} % footrule width
+
+\makeatletter
+\patchcmd{\headrule}{\hrule}{\color{black}\hrule}{}{} % headrule
+\patchcmd{\footrule}{\hrule}{\color{black}\hrule}{}{} % footrule
+\makeatother
+
+\definecolor{blueM}{cmyk}{1.0,0.49,0.0,0.47}
+
+
+
+\chead[C]
+
+    
+\begin{document}
+\twocolumn[\begin{@twocolumnfalse}
+
+
+
+
+\centerline{\rule{0.95\textwidth}{0.4pt}}
+
+\begin{center}
+    
+    %\begin{minipage}{}
+    
+     \textbf{\huge Application de la factorisation des matrices positives dans un système de recommandation} 
+
+    %\end{minipage}
+    
+\end{center}
+
+\centerline{\rule{0.95\textwidth}{0.4pt}}
+
+\vspace{15pt}
+
+\begin{tabular}{lr}
+    Mohamed EL KHMISSI &\\
+    Mohamed Abdelmalek BOUARROUDJ &\\
+	Rapport de projet d'Apprentissage Statistique (HAX907X) &\\
+	M2 SSD & \\
+    2022/2023 & 
+\end{tabular}    
+
+
+\vspace{15pt}
+\end{@twocolumnfalse}]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\par \vspace{1mm}
+\justify
+ 
+Ce rapport se situe dans le cadre du projet de module $HAX907X$, dans lequel on va présenter la méthode NMF (Non-negative matrix factorisation) pour construire un système de recommandation, en travaillant sur des jeux de données de \href{https://www.bookcrossing.com/}{$Book-crossing$}, dont le but de recomender des livres aux utilisateurs.
+
+\par \vspace{1mm}  %utilizar estos comando para tener una separación de parrafos adecuada.
+
+%%%%%%%%%%%%%%%%%%%%
+
+%\begin{equation}
+%    \label{eq:eg2}
+%\end{equation}
+%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{La méthode NMF}
+\justify
+La méthode NMF c'est une méthode du filtrage collaboratif, qui consiste à chercher des variables explicatives 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{thebibliography}{9}
+\bibitem{Bordat} P. Bordat et al. ``An improved dimethyl sulfoxide force field for molecular dynamics simulations'' \textit{J. Chemical Physics} Vol. 374 (2003) p. 201-205.
+\end{thebibliography} 
+
+\end{document}
