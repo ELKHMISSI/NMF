@@ -1,5 +1,5 @@
-\documentclass[11pt,letterpaper,twocolumn]{article}
-
+\documentclass[12pt,letterpaper,twocolumn]{article}
+%
 
 \usepackage[utf8]{inputenc}
 \usepackage[french]{babel}
@@ -19,6 +19,7 @@
 \usepackage{subcaption}
 \usepackage{enumitem}
 \usepackage{geometry}
+\usepackage[superscript,biblabel]{cite}
 \geometry{
   top=0.8in,            
   inner=0.5in,
@@ -35,6 +36,7 @@
 \usepackage[compact]{titlesec}
 \usepackage{stfloats}
 \usepackage{hyperref}
+\usepackage{mathbbol}
 
 \setlength{\columnsep}{30pt}
 
@@ -71,7 +73,7 @@
     
     %\begin{minipage}{}
     
-     \textbf{\huge Application de la factorisation des matrices positives dans un système de recommandation} 
+     \textbf{\huge Filtrage Collaboratif} 
 
     %\end{minipage}
     
@@ -84,10 +86,11 @@
 \begin{tabular}{lr}
     Mohamed EL KHMISSI &\\
     Mohamed Abdelmalek BOUARROUDJ &\\
-	Rapport de projet d'Apprentissage Statistique (HAX907X) &\\
-	M2 SSD & \\
+	Rapport de projet d'Apprentissage Statistique &\\
     2022/2023 & 
 \end{tabular}    
+
+\newpage
 
 
 \vspace{15pt}
@@ -97,7 +100,8 @@
 \par \vspace{1mm}
 \justify
  
-Ce rapport se situe dans le cadre du projet de module $HAX907X$, dans lequel on va présenter la méthode NMF (Non-negative matrix factorisation) pour construire un système de recommandation, en travaillant sur des jeux de données de \href{https://www.bookcrossing.com/}{$Book-crossing$}, dont le but de recomender des livres aux utilisateurs.
+De nos jours tous les géants mondiaux de la tech mettent en place des systèmes de recommandation pour déterminer les produits les plus susceptibles d’intéresser les clients à partir d’un certain nombre d’informations, c'est ce qu'on appelle filtrage collaboratif. les systèmes les plus utilisés sont basés sur la recherche de quelques facteurs latents susceptibles d’expliquer en faible dimension les interactions entre clients et produits. \\
+Dans ce rapport nous allons essayer de prédire les notes qu'un lecteur pourrait donner à un livre qui n'a pas lu encore par la méthode de filtrage collaboratif appeler NMF (factorisation matricielle non négative).\\
 
 \par \vspace{1mm}  %utilizar estos comando para tener una separación de parrafos adecuada.
 
@@ -109,13 +113,128 @@ Ce rapport se situe dans le cadre du projet de module $HAX907X$, dans lequel on 
 %%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{La méthode NMF}
+\section{Présentation des données}
 \justify
-La méthode NMF c'est une méthode du filtrage collaboratif, qui consiste à chercher des variables explicatives 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Tout d'abord BookCrossing est un site de réseau social intelligent qui met les gens en contact par les livres, le but est de faire passer un livre d'un lecteur à un autre sans frontière. \\
+Nous avons récolté notre base de données "Book-Crossing Dataset" de ce site \cite{Site}, elle comprend 278.860 BookCrosseurs (lecteurs) et 271.360 livres, et on dispose pour chaque lecteur les évaluations qu'il a donné à des livres lus (plus que 1.149.781 évaluations entre 1 le pire et 10 le meilleur). \\
+Pour notre cas pratique nous avons pris tous les livres qui ont été noté par au moins 100 lecteurs et tous les lecteurs qui ont notés au moins 300 livres soit au total 553 lecteurs et 731 livres. \\
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.50]{capture1.png}
+\caption{Extrait de la base de données}
+\end{figure}
+
+A partir de cette base de données nous avons crées une matrice $X \in \mathbb{R}^{n\times p}$, contenant pour chaque lecteur i (ligne) une note d’appréciation de 1 à 10 d'un livre j (colonne), la matrice X est donc trés creuse et contient que des valeurs non négatives.
+
+$$ X = \overset{p}{\begin{pmatrix}
+ 8&  0&  ..&   0& 1\\ 
+ 1&  3&  ..&   6& 0\\ 
+ :&   :&  .&  :&: \\ 
+ 0& 0 &  ..&  0&0 \\ 
+ 0&  0&  ..&   0&5 
+\end{pmatrix}}n $$ \\
+
+\textcolor{red}{Remarque} la valeur "0" signifie une donnée manquante (le livre n'a pas encore été lu ou évalué), c'est d'ailleurs la valeur qu'on veut prédire pour recommander au lecteur (i) le livre (j) si la note prédite dépasse un certain seuil. 
+
+
+
+\section{Principe de la Factorisation Matricielle Non-Négative}
+\justify \\
+
+L’idée principale derrière un problème de factorisation matricielle non-négative est d’apprendre un modèle latent de lecteurs $W\in \mathbb{R}^{n\times r}$ et de livres $H\in \mathbb{R}^{r\times p}$ de sorte que la reconstruction $\widehat{X}_{ij}=W_iH_j$ entre un lecteur i et un livre j estime la note $X_{ij}$. Autrement dit la recherche de deux matrices $W_{n\times r}$ et $H_{r\times p}$ avec un faible rang (r) et ne contenant que des valeurs positives ou nulles et dont le produit se rapproche de X.
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=1]{NMF.png}
+\caption{Factorisation Matricielle}
+\end{figure}
+
+Schématiquement, $W_{ik}$ dénote l’appétence du i-ème utilisateur pour le k-ème facteur latent, tandis que $H_{kj}$ décrit quelle part du j-ème lecteur intervient
+dans le k-ème facteur latent ; le modèle suppose que la note $X_{ij}$ est la somme,
+sur tous les facteurs latents k, des produits $W_{ik}\times H_{kj}$. \\ 
+
+\section{Problème de la factorisation}
+\justify  
+
+La factorisation est résolue par la recherche d’un optimum local du problème d’optimisation :
+$$ \underset{W,H\geq 0}{min}[L(X, WH), P(W,H)] $$
+L est une fonction perte mesurant la qualité d’approximation (critère de Frobenius).
+Comme on connaît les valeurs (les évaluations) $x_{ij}$ pour les couples $(i, j)$ appartenant à un ensemble $\chi$, et les autres valeurs sont inconnues. On s’intéresse donc qu’aux termes connus de la matrice. Ainsi, on cherche à minimiser :
+
+$$ L(X,WH)= \frac{1}{2} \left \| X-WH \right \|^2_F = \frac{1}{2} \sum_{(i,j)\in \chi}^{}(x_{ij}-w_ih_j)^2 $$  \\
+Et P une fonction de pénalisation optionnelle.
+
+\begin{align*}\begin{aligned}
+P(W, H) &= \alpha_W \times l1\_ratio \times p \times ||vec(W)||_1\\
+&+ \alpha_H \times l1\_ratio \times n \times ||vec(H)||_1\\
+&+ 0.5 \times \alpha_W \times (1 - l1\_ratio) \times p \times ||W||_{F}^2\\
+&+ 0.5 \times \alpha_H \times (1 - l1\_ratio) \times n \times ||H||_{F}^2
+\end{aligned}\end{align*}
+  
+
+\begin{itemize}[label=\textbullet ]
+    \item $\alpha_W$ (resp $\alpha_H$) est une constante qui multiplie les termes de régularisation de W (resp H).
+    \item $l1\_ratio$ est un paramètre de mélange de régularisation, la pénalité est une pénalité : $$  \left\{\begin{matrix}
+ L1 & si & l1\_ratio=1\\ 
+ L2 & si & l1\_ratio=0 \\
+ Elastic~net & si & 0<l1\_ratio<1 
+\end{matrix}\right. $$
+\end{itemize}
+
+
+\textcolor{red}{Remarque} Les algorithmes NMF convergent au mieux vers des optimums locaux (à cause de la contrainte de positivité de W et H), alors que la SVD bénéficie d’une convergence "globale" néanmoins la SVD est moins adaptée au contexte car les solutions ne sont pas cohérentes avec l’objectif recherché : des évaluations (notes) positives. \\
+
+
+\section{Exemple}
+\justify  
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.35]{exp.png}
+\caption{Exemple de factorisation}
+\end{figure}
+
+Si on prend l'exemple ci-dessus, la factorisation matricielle non-négative a permis de trouver deux facteurs latents (r=2) qui sont le type de livres (juste pour l'exemple, car en réalité, nous ne pouvons pas les décrire, ça serait plutôt f1 et f2).\\
+Les coordonnées de la matrice W représentent l'appétence qu'un lecteur à pour le type de livre k, et les coordonnées de la matrice H représentes le poids du facteur k pour un livre donné. \\
+\\
+Le lecteur \textcolor{blue}{E} il a une appétence de 3 pour les livres de romance et 1 pour les livres d'histoire, et le livre \textcolor{red}{L1} a un poids de 3 pour les livres de romance et 1 pour les livres d'histoire, en faisant le produit des facteurs latents du lecteur \textcolor{blue}{E} et le livre \textcolor{red}{L1} nous retrouvons la note que ce lecteur est successible de donnée à ce livre.
+
+\\
+
+\section{Cas pratique}
+\justify  
+
+Pour répondre à notre problématique qui est de prédire les notes qu'un lecteur pourrait donner à un livre nous allons utiliser la méthode NMF de la librairie sickit-learn qui se base sur la résolution du problème que nous avons présentés dans la section 4.\\
+Nous avons pris les paramètres suivants : 
+
+\begin{itemize}[label=\textbullet ]
+    \item La méthode  "mu" (Multiplicative Update solver) pour la factorisation de la matrice X en WH. 
+    \item  $l1\_ratio=1$ et donc pénalité L1 ce qui va forcer certaines valeurs de H et W a être égale à 0.
+    \item  Rang de factorisation r=(8, 9, 10, 11, 12, 13, 14)
+    \item $\alpha=\alpha_W = \alpha_H$ = (0, 0.025, 0.05, 0.075, 0.1)
+\end{itemize}
+
+Nous avons pris la matrice X de taille (553, 731) qui contient 404.243 coordonnées dont a peu prés 9.000 valeurs remplis et 395.243 valeurs manquantes que nous allons essayer de prédire.
+
+Pour calibrer le meilleur couple de paramètre (r, $\alpha$) nous allons procéder comme suit :
+
+\begin{itemize}[label=\textbullet ]
+    \item Prendre un couple (r,$\alpha$)
+    \item  Prendre 100 coordonnées non nulles de la matrices $X$ les vider puis calculer $\widehat{X}$
+    \item  Calculer le RMSE entre $X$ et $\widehat{X}$ (pour les 100 coordonnées dont on connaît les vraies valeurs)
+    \item Répéter le procédure 20 fois
+    \item Calculer l'erreur le RMSE moyen de chaque couple (r,$\alpha$) puis prendre l'optimal.
+\end{itemize}
+
+À la fin, nous avons créé une fonction qui, à partir d'un seuil donné elle renvoie les titres des livres à recommander à des groupes de lecteurs. (voir le script pour plus détails \cite{Site2})
+
 
 \begin{thebibliography}{9}
-\bibitem{Bordat} P. Bordat et al. ``An improved dimethyl sulfoxide force field for molecular dynamics simulations'' \textit{J. Chemical Physics} Vol. 374 (2003) p. 201-205.
+\bibitem{Site} http://www2.informatik.uni-freiburg.de/~cziegler/BX/
+\bibitem{Site2} https://github.com/ELKHMISSI/NMF
 \end{thebibliography} 
 
 \end{document}
